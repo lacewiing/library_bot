@@ -179,19 +179,19 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
     if check_sts == None:
         ans = "Мы не знакомы! Запускаем процесс регистрации читательского билета!"
         await message.answer(ans)
-        ans = "Введите ваше ФИО, возраст и номер мобильного телефона, разделив их запятыми:"
+        ans = "Введите Ваше ФИО, возраст и номер мобильного телефона, разделив их запятыми:"
         await message.answer(ans)
         await state.set_state(register.reg)
     else:
         if check_sts[0] != None and check_sts[1] == None: # если в систему входит читатель
-            ans = "Привет, " + str(check_sts[0]) + "❤️"
+            ans = "Добрый день, " + str(check_sts[0])
             await message.answer(ans, reply_markup=select_act)
         elif check_sts[1] != None and check_sts[0] == None: # если в систему входит библиотекарь
-            ans = "Приветики, " + str(check_sts[1])
+            ans = "Добрый день, " + str(check_sts[1])
             await message.answer(ans, reply_markup=bselect_act)
             await state.set_state(register.bmenu)
         elif check_sts[1] != None and check_sts[0] != None: # если в системе входит библиотекарь, являющийся читателем
-            ans = "Привет, солнце!❤️ Выбери, кто ты сегодня."
+            ans = "Добрый день! Выберите, кто Вы сегодня."
             await message.answer(ans, reply_markup=double_select_act)
         else:
             ans = "Что-то пошло не так..."
@@ -221,7 +221,7 @@ async def get_book(callback: types.CallbackQuery, state: FSMContext):
     cursor.execute(sql_query)
     if cursor.fetchone()[0] >= 3:
         await callback.message.edit_reply_markup(reply_markup=None)
-        await callback.message.answer("Вы уже взяли максимум книг! Сначала прочтите это 😝", reply_markup=select_act)
+        await callback.message.answer("Вы уже взяли максимум книг (3).", reply_markup=select_act)
         await state.set_state(register.menu)
     else:
         await callback.message.edit_reply_markup(reply_markup=None)
@@ -304,7 +304,7 @@ async def get_book(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query(F.data == "list") # список книг
 async def list_of_books_filter(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.edit_reply_markup(reply_markup=None)
-    await callback.message.answer("Введите буквы для алфавитного поиска (по названию книги) или диапазон букв через тире (например, пи-тух).\nДля вывода всех книг можете ввести * или 0-я")
+    await callback.message.answer("Введите буквы для алфавитного поиска (по названию книги) или диапазон букв через тире (например, ав-ту).\nДля вывода всех книг можете ввести * или 0-я")
     await state.set_state(register.book_filter)
 
 @dp.message(register.book_filter) # получаем список книг в виде фильтрованного списка
@@ -365,7 +365,7 @@ async def list_of_books(message: types.Message, state = FSMContext):
 @dp.callback_query(F.data == "redit")
 async def redit(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.edit_reply_markup(reply_markup=None)
-    await callback.message.answer("Введите фильтр для поиска пользователя по ФИО. \nЭто может быть часть имени/фамилии/отчетсва или диапазон букв для алфавитного поиска (например, пи-тух)")
+    await callback.message.answer("Введите фильтр для поиска пользователя по ФИО. \nЭто может быть часть имени/фамилии/отчетсва или диапазон букв для алфавитного поиска (например, ав-ту)")
     await state.set_state(register.bselect_reader)
 
 @dp.callback_query(F.data == "redbook")
@@ -442,7 +442,7 @@ ORDER BY "Читательский билет"."Номер" ASC
 @dp.callback_query(F.data == "delete")
 async def delete(callback: types.CallbackQuery, state = FSMContext):
     await callback.message.edit_reply_markup(reply_markup=None)
-    await callback.message.answer("Введите буквы для алфавитного поиска (по названию книги) или диапазон букв через тире (например, пи-тух).\nДля вывода всех книг можете ввести * или 0-я")
+    await callback.message.answer("Введите буквы для алфавитного поиска (по названию книги) или диапазон букв через тире (например, ав-ту).\nДля вывода всех книг можете ввести * или 0-я")
     await state.set_state(register.rbook_filter)
     #await callback.message.answer("Что хотите удалить?", reply_markup=bselect_redbook)
 
@@ -468,7 +468,7 @@ async def rbook_create(message: types.Message, state = FSMContext):
     else:
         results = find_user([message.text])
     if len(results) < 1:
-        await message.answer("К сожалению, у нас такого читателя нет🥺 Попробуйте ещё раз!", reply_markup=bselect_act)
+        await message.answer("К сожалению, у нас такого читателя нет. Попробуйте ещё раз!", reply_markup=bselect_act)
         await state.set_state(register.bmenu)
     else:
         formatted_result = []
@@ -740,7 +740,7 @@ async def take(callback: types.CallbackQuery, state: FSMContext):
         cursor.execute(sql_query)
         conn.commit()
         print(sql_query)
-        await callback.message.answer("Ура! Книга записана вам в билет, приятного чтения📖", reply_markup=select_act)
+        await callback.message.answer("Книга успешно записана Вам в билет, приятного чтения📖", reply_markup=select_act)
         await state.set_state(register.menu)
 ######################################################################
 
@@ -826,7 +826,7 @@ async def return_book(callback: types.CallbackQuery, state: FSMContext):
     cursor.execute(sql_query)
     conn.commit()
     print(sql_query)
-    await callback.message.answer("Книга возвращена👉👈", reply_markup=select_act)
+    await callback.message.answer("Книга успешно возвращена", reply_markup=select_act)
     await state.set_state(register.menu)
 
 
